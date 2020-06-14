@@ -12,15 +12,17 @@ pygame.display.set_caption((str(random.randint(3, 36)) + ' Bastards in the Hidde
 # ------------------------------------------------ GAME ENGINE ------------------------------------------------------- #
 
 
-def interact_with_objects(player, objects):
+def interact_with_objects(player, objects, cursor, display):
+    view_direction = player.overview(cursor, display)
     for object in objects:
-        if player.int_area.colliderect(object.rect) and object.__class__.__name__ == 'Door':
-            if unpass_sprites.has(object):
-                object.set_condition('open')
-            else:
-                object.set_condition('close')
-        elif player.int_area.colliderect(object.rect) and object.__class__.__name__ == 'IntObject':
-            print('grab')
+        if object.rect.collidepoint(cursor) and player.int_area.colliderect(object.rect):
+            if object.__class__.__name__ == 'Door':
+                if unpass_sprites.has(object):
+                    object.set_condition('open')
+                else:
+                    object.set_condition('close')
+            elif object.__class__.__name__ == 'IntObject':
+                print('grab')
 
 
 def draw_grid(display):
@@ -30,22 +32,16 @@ def draw_grid(display):
         pygame.draw.line(display, LIGHTGREY, (0, y), (W_WIDTH, y))
 
 
-def redraw_win(display, player, cursor, clock, camera):
+def redraw_win(display, player, cursor, clock):
     all_sprites.update()
-    camera.update(player)
 
     # draw background
     display.fill(DARKGREY)
 
-    # all_sprites.draw(win)
-    for sprite in all_sprites:
-        display.blit(sprite.image, camera.apply(sprite))
-
     # devmod data
     if DEV_MOD == 'on':
-        draw_grid(win)
         pygame.draw.rect(win, BLUE, player.int_area)
-        pygame.draw.circle(win, RED, cursor, 5)
+        pygame.draw.circle(win, BLUE, cursor, 4)
         pygame.draw.line(win, WHITE, player.rect.center, cursor, 2)
         # fps counter
         font = pygame.font.SysFont('Arial', 36, bold=True)
@@ -53,6 +49,9 @@ def redraw_win(display, player, cursor, clock, camera):
         render = font.render(display_fps, 0, RED)
         win.blit(render, (W_WIDTH - 65, 5))
 
+    all_sprites.draw(win)
+    player.overview(cursor, win)
+    
     # update screen
     pygame.display.update()
 
@@ -66,8 +65,6 @@ def main():
     obj_layer = map.decode()
     # creating character
     character = Char(600, 600, all_sprites)
-    # spawn camera
-    camera = Camera(map.map_width, map.map_height)
     # initialize game timer
     clock = pygame.time.Clock()
 
@@ -77,19 +74,17 @@ def main():
         dt = clock.tick(FPS) / 1000
         cursor = pygame.mouse.get_pos()
         for event in pygame.event.get():
-            if event.type == pygame.QUIT:
+            if event.type == pygame.QUIT or (event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE):
                 pygame.quit()
                 quit()
-            if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_e:
-                    interact_with_objects(character, obj_layer)
-                if event.key == pygame.K_ESCAPE:
-                    pygame.quit()
-                    quit()
+            mouse_buttons = pygame.mouse.get_pressed()
+            if mouse_buttons[0]:
+                interact_with_objects(character, obj_layer, cursor, win)
         # events
         character.movement(dt)
         # updates
-        redraw_win(win, character, cursor, clock, camera)
+        redraw_win(win, character, cursor, clock)
+
 
 # initializing the game
 main()

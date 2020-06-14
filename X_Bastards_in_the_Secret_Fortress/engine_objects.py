@@ -21,12 +21,16 @@ class Char(pygame.sprite.Sprite):
         self.int_area = self.rect.inflate(10, 10)
         self.speed = 500          # pixels per second
 
-    def overview(self, cursor_pos):
+    def overview(self, cursor, display):
         center = self.rect.center
-        guiding_vector_length = math.sqrt(((cursor_pos[0] - center[0]) ** 2) + ((cursor_pos[1] - center[1]) ** 2))
-        cos_a = (cursor_pos[0] - center[0]) / guiding_vector_length
-        cos_b = (cursor_pos[1] - center[1]) / guiding_vector_length
-        return cos_a, cos_b
+        guiding_vector_length = math.sqrt((center[0] - cursor[0]) ** 2 + (center[1] - cursor[1]) ** 2)
+        cos_a, cos_b = 0, 0
+        if guiding_vector_length != 0:
+            cos_a = (center[0] - cursor[0]) / guiding_vector_length
+            cos_b = (center[1] - cursor[1]) / guiding_vector_length
+        end_point = (center[0] - DEPTH * cos_a, center[1] - DEPTH * cos_b)
+        # main ray cast
+        pygame.draw.line(display, WHITE, center, end_point)
 
     def movement(self, dt):
         keys = pygame.key.get_pressed()

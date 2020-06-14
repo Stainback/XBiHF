@@ -24,20 +24,3 @@ class Map:
                 if self.map_data[row][column] == '3':
                     self.obj_layer.append(Door(column * CELL, row * CELL, all_sprites, obj_sprites, unpass_sprites))
         return self.obj_layer
-
-
-class Camera:
-    def __init__(self, width, height):
-        self.cs = pygame.Surface([width, height])
-        self.camera = pygame.Rect(0, 0, width, height)
-        self.width = width
-        self.height = height
-
-    def apply(self, entity):
-        return entity.rect.move(self.camera.topleft)
-
-    def update(self, target):
-        x = -target.rect.center[0] + W_WIDTH // 2
-        y = -target.rect.center[1] + W_HEIGHT // 2
-        self.cs = pygame.Surface([self.width, self.height])
-        self.camera = pygame.Rect(x, y, self.width, self.height)

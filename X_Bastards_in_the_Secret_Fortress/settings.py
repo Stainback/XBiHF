@@ -2,6 +2,7 @@
 W_WIDTH = 1280
 W_HEIGHT = 1024
 FPS = 60
+DEPTH = 500
 DEV_MOD = 'on'
 
 
